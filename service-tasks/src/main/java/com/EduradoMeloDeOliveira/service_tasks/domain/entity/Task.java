@@ -29,6 +29,8 @@ public class Task {
     public Task(TaksRequestDTO taksRequestDTO) {
         this.title = taksRequestDTO.title();
         this.dueDate = taksRequestDTO.dueDate();
+        this.isNotified = false;
+        this.email = taksRequestDTO.email();
 
     }
 }

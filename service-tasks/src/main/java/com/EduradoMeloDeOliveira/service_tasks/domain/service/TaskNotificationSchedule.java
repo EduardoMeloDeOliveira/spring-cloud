@@ -10,7 +10,7 @@ public class TaskNotificationSchedule {
 
     private final TaskService taskService;
 
-    @Scheduled(fixedRate = 360_000 * 24)
+    @Scheduled(fixedRate = 60)
     public void checkAndNotify() {
         taskService.sendNotification();
     }

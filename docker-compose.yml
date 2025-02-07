@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgresql-db
+    environment:
+      POSTGRES_DB: tasks
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 1033
+    ports:
+      - "5432:5432"
+    networks:
+      - service-network
+
+
+  service-main:
+    build:
+      context: ./service.main
+    ports:
+      - "8888:8888"
+    healthcheck:
+      test: [ "CMD","curl","-f","http://localhost:8888/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - service-network
+
+
+
+  service-notification:
+    build:
+      context: ./service-notification
+    ports:
+      - "8082:8082"
+    depends_on:
+      service-main:
+        condition: service_healthy
+    networks:
+      - service-network
+
+
+  service-task:
+    build:
+      context: ./service-tasks
+    ports:
+      - "8081:8081"
+
+    environment:
+      SERVER_PORT: 8081
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/tasks
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1033
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+    depends_on:
+      postgres:
+        condition: service_started
+
+      service-main:
+        condition: service_healthy
+
+      service-notification:
+        condition: service_started
+
+    networks:
+      - service-network
+
+networks:
+    service-network:
+      driver: bridge
