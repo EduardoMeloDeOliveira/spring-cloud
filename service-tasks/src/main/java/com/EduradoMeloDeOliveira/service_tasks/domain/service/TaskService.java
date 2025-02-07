@@ -15,9 +15,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TaskService {
 
-    private final TaskRepository taskRepository;
 
-    private final NotificationService notificationService;
+    private final  TaskRepository taskRepository;
+
+    private  final NotificationService notificationService;
+
 
     public TaskResponseDTO save(TaksRequestDTO requestDTO) {
         Task task = new Task(requestDTO);
@@ -28,10 +30,11 @@ public class TaskService {
     public void sendNotification() {
         List<Task> tasks = taskRepository.findDueDateWithDeadLine(LocalDateTime.now().plusDays(1));
 
-        for(Task taskIndex: tasks) {
+        for (Task taskIndex : tasks) {
             NotificationRequestDTO notificationRequestDTO = new NotificationRequestDTO(taskIndex);
             notificationService.sendNotification(notificationRequestDTO);
             taskIndex.setIsNotified(true);
+            taskRepository.save(taskIndex);
         }
     }
 }
